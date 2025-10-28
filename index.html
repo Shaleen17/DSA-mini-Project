@@ -1,0 +1,293 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Advanced Library Tracker</title>
+    <link href="style.css" rel="stylesheet" type="text/css" />
+    <!-- Load Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style></style>
+  </head>
+  <body class="bg-gray-100">
+    <!-- Container for the entire layout -->
+    <div class="flex flex-col md:flex-row h-screen">
+      <!-- Sidebar -->
+      <aside
+        class="w-full md:w-80 bg-white shadow-lg p-6 flex flex-col flex-shrink-0"
+      >
+        <h1 class="text-3xl font-bold text-blue-600 mb-8">Library Tracker</h1>
+
+        <button
+          id="openAddBookModal"
+          class="w-full flex items-center justify-center py-3 px-4 border border-transparent shadow-sm text-sm font-medium rounded-lg text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-colors"
+        >
+          <svg
+            xmlns="http://www.w3.org/2000/svg"
+            class="h-5 w-5 mr-2"
+            viewBox="0 0 20 20"
+            fill="currentColor"
+          >
+            <path
+              fill-rule="evenodd"
+              d="M10 3a1 1 0 011 1v5h5a1 1 0 110 2h-5v5a1 1 0 11-2 0v-5H4a1 1 0 110-2h5V4a1 1 0 011-1z"
+              clip-rule="evenodd"
+            />
+          </svg>
+          Add New Book
+        </button>
+
+        <!-- Search & Filter -->
+        <div class="mt-8">
+          <h2 class="text-xl font-semibold mb-4 text-gray-800">Find a Book</h2>
+          <div class="space-y-4">
+            <div class="relative">
+              <span class="absolute inset-y-0 left-0 pl-3 flex items-center">
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  class="h-5 w-5 text-gray-400"
+                  viewBox="0 0 20 20"
+                  fill="currentColor"
+                >
+                  <path
+                    fill-rule="evenodd"
+                    d="M8 4a4 4 0 100 8 4 4 0 000-8zM2 8a6 6 0 1110.89 3.476l4.817 4.817a1 1 0 01-1.414 1.414l-4.816-4.816A6 6 0 012 8z"
+                    clip-rule="evenodd"
+                  />
+                </svg>
+              </span>
+              <input
+                type="search"
+                id="searchQuery"
+                class="block w-full pl-10 pr-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
+                placeholder="Search..."
+              />
+            </div>
+            <select
+              id="searchType"
+              class="block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
+            >
+              <option value="title" selected>by Title</option>
+              <option value="author">by Author</option>
+            </select>
+          </div>
+          <div class="mt-6">
+            <p class="block text-sm font-medium text-gray-700 mb-2">
+              Filter by Status:
+            </p>
+            <div id="filterButtons" class="flex flex-col space-y-2">
+              <button
+                class="filter-btn filter-active w-full text-left px-4 py-2 rounded-lg text-sm font-medium transition-colors"
+                data-filter="all"
+              >
+                Show All
+              </button>
+              <button
+                class="filter-btn w-full text-left px-4 py-2 rounded-lg text-sm font-medium bg-gray-200 hover:bg-gray-300 transition-colors"
+                data-filter="available"
+              >
+                Available
+              </button>
+              <button
+                class="filter-btn w-full text-left px-4 py-2 rounded-lg text-sm font-medium bg-gray-200 hover:bg-gray-300 transition-colors"
+                data-filter="borrowed"
+              >
+                Borrowed
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <!-- DSA Explanation -->
+        <div class="mt-auto pt-6 border-t border-gray-200">
+          <h3 class="text-md font-semibold text-gray-700 mb-2">
+            How This Works:
+          </h3>
+          <ul
+            class="list-disc list-outside ml-5 space-y-2 text-sm text-gray-600"
+          >
+            <li>
+              <strong>Binary Search Tree:</strong> Stores all books, sorted by
+              title for fast `O(log n)` searching.
+            </li>
+            <li>
+              <strong>Linked List:</strong> Each book has its own list to track
+              its borrow/return history.
+            </li>
+          </ul>
+        </div>
+      </aside>
+
+      <!-- Main Content -->
+      <main class="flex-1 p-6 md:p-8 overflow-y-auto">
+        <!-- Statistics Dashboard -->
+        <section
+          id="statsDashboard"
+          class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8"
+        >
+          <!-- Stat cards will be inserted here -->
+        </section>
+
+        <!-- Book List Display -->
+        <section id="bookList" class="grid grid-cols-1 xl:grid-cols-2 gap-6">
+          <!-- Book cards will be dynamically inserted here -->
+        </section>
+      </main>
+    </div>
+
+    <!-- Modals -->
+
+    <!-- Add/Edit Book Modal -->
+    <div
+      id="bookModal"
+      class="modal-backdrop fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 hidden opacity-0"
+    >
+      <div
+        class="modal-content bg-white p-6 rounded-lg shadow-xl w-full max-w-md transform -translate-y-10"
+      >
+        <div class="flex justify-between items-center mb-4">
+          <h2 id="bookModalTitle" class="text-2xl font-semibold text-gray-800">
+            Add New Book
+          </h2>
+          <button id="closeBookModal" class="text-gray-400 hover:text-gray-600">
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              class="h-6 w-6"
+              fill="none"
+              viewBox="0 0 24 24"
+              stroke="currentColor"
+            >
+              <path
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                stroke-width="2"
+                d="M6 18L18 6M6 6l12 12"
+              />
+            </svg>
+          </button>
+        </div>
+        <form id="bookForm" class="space-y-4">
+          <input type="hidden" id="bookId" />
+          <div>
+            <label for="title" class="block text-sm font-medium text-gray-700"
+              >Title</label
+            >
+            <input
+              type="text"
+              id="title"
+              name="title"
+              required
+              class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
+              placeholder="e.g., The Great Gatsby"
+            />
+          </div>
+          <div>
+            <label for="author" class="block text-sm font-medium text-gray-700"
+              >Author</label
+            >
+            <input
+              type="text"
+              id="author"
+              name="author"
+              required
+              class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
+              placeholder="e.g., F. Scott Fitzgerald"
+            />
+          </div>
+          <button
+            type="submit"
+            id="saveBookButton"
+            class="w-full inline-flex justify-center py-2 px-4 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-colors"
+          >
+            Save Book
+          </button>
+        </form>
+      </div>
+    </div>
+
+    <!-- History Modal -->
+    <div
+      id="historyModal"
+      class="modal-backdrop fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 hidden opacity-0"
+    >
+      <div
+        class="modal-content bg-white p-6 rounded-lg shadow-xl w-full max-w-md transform -translate-y-10"
+      >
+        <div class="flex justify-between items-center mb-4">
+          <h2 class="text-2xl font-semibold text-gray-800">Borrow History</h2>
+          <button
+            id="closeHistoryModal"
+            class="text-gray-400 hover:text-gray-600"
+          >
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              class="h-6 w-6"
+              fill="none"
+              viewBox="0 0 24 24"
+              stroke="currentColor"
+            >
+              <path
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                stroke-width="2"
+                d="M6 18L18 6M6 6l12 12"
+              />
+            </svg>
+          </button>
+        </div>
+        <h3
+          id="historyBookTitle"
+          class="text-lg font-medium text-gray-700 italic mb-4"
+        ></h3>
+        <div
+          id="historyListContainer"
+          class="history-list max-h-60 overflow-y-auto space-y-3 pr-2"
+        >
+          <!-- History items will be injected here -->
+        </div>
+      </div>
+    </div>
+
+    <!-- Delete Confirmation Modal -->
+    <div
+      id="deleteModal"
+      class="modal-backdrop fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 hidden opacity-0"
+    >
+      <div
+        class="modal-content bg-white p-6 rounded-lg shadow-xl w-full max-w-md transform -translate-y-10"
+      >
+        <h2 class="text-xl font-semibold text-gray-800">Confirm Deletion</h2>
+        <p class="text-gray-600 mt-2 mb-6">
+          Are you sure you want to delete "<span
+            id="deleteBookTitle"
+            class="font-medium"
+          ></span
+          >"? This action cannot be undone.
+        </p>
+        <div class="flex justify-end space-x-3">
+          <button
+            id="cancelDeleteButton"
+            class="py-2 px-4 border border-gray-300 shadow-sm text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
+          >
+            Cancel
+          </button>
+          <button
+            id="confirmDeleteButton"
+            class="py-2 px-4 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-red-600 hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500"
+          >
+            Delete
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Toast Notification -->
+    <div
+      id="toast"
+      class="toast fixed bottom-10 right-10 transform translate-y-20 bg-gray-800 text-white py-3 px-5 rounded-lg shadow-xl"
+    >
+      <span id="toastMessage"></span>
+    </div>
+    <script src="script.js"></script>
+  </body>
+</html>
